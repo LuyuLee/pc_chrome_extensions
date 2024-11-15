@@ -1,0 +1,31 @@
+{
+  "manifest_version": 3,
+  "name": "网页内容下载器",
+  "description": "下载网页的所有前端内容",
+  "version": "1.0",
+  "permissions": [
+    "activeTab",
+    "downloads",
+    "storage",
+    "scripting"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "images/icon.svg",
+      "48": "images/icon.svg",
+      "128": "images/icon.svg"
+    }
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "icons": {
+    "16": "images/icon.svg",
+    "48": "images/icon.svg",
+    "128": "images/icon.svg"
+  }
+} 
