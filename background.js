@@ -33,6 +33,23 @@ async function retryDownload(downloadFunction, maxRetries = 3) {
   throw lastError;
 }
 
+// 简单的下载函数
+async function simpleDownload(url, filename) {
+  return new Promise((resolve, reject) => {
+    chrome.downloads.download({
+      url: url,
+      filename: filename,
+      conflictAction: 'uniquify'
+    }, (downloadId) => {
+      if (chrome.runtime.lastError) {
+        reject(chrome.runtime.lastError);
+      } else {
+        resolve(downloadId);
+      }
+    });
+  });
+}
+
 async function downloadPageContent(url, html, resources) {
   try {
     let defaultFilename = url.split('/').pop() || 'index';
@@ -42,19 +59,23 @@ async function downloadPageContent(url, html, resources) {
     }
     
     const dataUrl = 'data:text/html;charset=utf-8,' + encodeURIComponent(html);
-    const downloadId = await chrome.downloads.download({
-      url: dataUrl,
-      filename: defaultFilename,
-      saveAs: true
+    
+    // 先下载HTML文件
+    const downloadId = await simpleDownload(dataUrl, defaultFilename);
+    
+    // 获取下载项信息
+    const downloadItem = await new Promise((resolve) => {
+      chrome.downloads.search({ id: downloadId }, ([item]) => {
+        resolve(item);
+      });
     });
 
-    chrome.downloads.onDeterminingFilename.addListener(async function listener(item, suggest) {
-      if (item.id === downloadId) {
-        const directory = item.filename.substring(0, item.filename.lastIndexOf('/'));
-        chrome.downloads.onDeterminingFilename.removeListener(listener);
-        await downloadResources(resources, directory);
-      }
-    });
+    // 从下载项中获取目录路径
+    const directory = downloadItem.filename.substring(0, downloadItem.filename.lastIndexOf('/'));
+    
+    // 下载其他资源
+    await downloadResources(resources, directory);
+
   } catch (error) {
     console.error('下载失败:', error);
     throw error;
@@ -66,11 +87,7 @@ async function downloadResources(resources, directory) {
   for (const cssUrl of resources.css) {
     const filename = sanitizeFilename(cssUrl.split('/').pop());
     await retryDownload(async () => {
-      await chrome.downloads.download({
-        url: cssUrl,
-        filename: `${directory}/css/${filename}`,
-        conflictAction: 'uniquify'
-      });
+      await simpleDownload(cssUrl, `${directory}/css/${filename}`);
     });
   }
 
@@ -78,11 +95,7 @@ async function downloadResources(resources, directory) {
   for (const jsUrl of resources.js) {
     const filename = sanitizeFilename(jsUrl.split('/').pop());
     await retryDownload(async () => {
-      await chrome.downloads.download({
-        url: jsUrl,
-        filename: `${directory}/js/${filename}`,
-        conflictAction: 'uniquify'
-      });
+      await simpleDownload(jsUrl, `${directory}/js/${filename}`);
     });
   }
 
@@ -90,11 +103,7 @@ async function downloadResources(resources, directory) {
   for (const imgUrl of resources.images) {
     const filename = sanitizeFilename(imgUrl.split('/').pop());
     await retryDownload(async () => {
-      await chrome.downloads.download({
-        url: imgUrl,
-        filename: `${directory}/images/${filename}`,
-        conflictAction: 'uniquify'
-      });
+      await simpleDownload(imgUrl, `${directory}/images/${filename}`);
     });
   }
 } 

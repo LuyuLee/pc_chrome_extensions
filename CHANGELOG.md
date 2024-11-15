@@ -25,4 +25,11 @@
 5. 功能优化
    - 新增：下载失败自动重试机制
    - 描述：资源下载失败时最多重试3次，每次间隔1秒
-   - 实现：添加retryDownload函数封装重试逻辑 
+   - 实现：添加retryDownload函数封装重试逻辑
+
+## 2024-11-16
+
+1. 问题修复
+   - 问题：报错"Too many listeners"和"Unexpected determineFilename call"
+   - 原因：下载监听器处理逻辑有误
+   - 解决：重构下载逻辑，移除监听器使用，改用downloads.search
