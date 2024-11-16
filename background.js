@@ -4,6 +4,11 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       .then(() => sendResponse({}))
       .catch(error => sendResponse({ error: error.message }));
     return true;
+  } else if (message.action === 'parseHtml') {
+    parseHtmlContent(message.html)
+      .then(result => sendResponse(result))
+      .catch(error => sendResponse({ error: error.message }));
+    return true;
   }
 });
 
@@ -105,5 +110,26 @@ async function downloadResources(resources, directory) {
     await retryDownload(async () => {
       await simpleDownload(imgUrl, `${directory}/images/${filename}`);
     });
+  }
+}
+
+async function parseHtmlContent(html) {
+  try {
+    const response = await fetch('http://localhost:5000/parse', {
+      method: 'POST',
+      body: html,
+      headers: {
+        'Content-Type': 'text/html'
+      }
+    });
+    
+    if (!response.ok) {
+      throw new Error('解析服务响应错误');
+    }
+    
+    return await response.json();
+  } catch (error) {
+    console.error('解析失败:', error);
+    throw error;
   }
 } 

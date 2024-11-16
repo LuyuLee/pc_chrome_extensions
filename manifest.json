@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "网页内容下载器",
-  "description": "下载网页的所有前端内容",
+  "description": "下载网页的所有前端内容并支持解析为JSON",
   "version": "1.0",
   "permissions": [
     "activeTab",

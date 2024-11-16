@@ -1,6 +1,6 @@
 # 开发日志
 
-## 2024-03-xx
+## 2024-11-16
 
 1. 初始功能实现
    - 创建基本UI界面
@@ -33,3 +33,8 @@
    - 问题：报错"Too many listeners"和"Unexpected determineFilename call"
    - 原因：下载监听器处理逻辑有误
    - 解决：重构下载逻辑，移除监听器使用，改用downloads.search
+
+2. 新增功能
+   - 新增：解析网页内容
+   - 描述：解析网页内容，提取文本、图片、元信息等
+   - 实现：添加parseHtmlContent函数，调用后端API解析网页内容
